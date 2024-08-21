@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Processing with Flask API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .preview {
+            margin-top: 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+        }
+        #stackedImage, #rfCalculatedImage {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Auto Retention Factor Calculator</h1>
+        <form id="uploadForm">
+            <label for="image">Choose an image to upload:</label>
+            <input type="file" id="image" name="image" accept="image/*" required>
+            <br><br>
+            <button type="submit">Upload and Process</button>
+        </form>
+
+        <div class="preview" id="previewContainer">
+            <h2>Processed Images:</h2>
+            <div>
+                <h3>Stacked Image:</h3>
+                <img id="stackedImage" src="" alt="Stacked Image">
+            </div>
+            <div>
+                <h3>Rf Calculated Image:</h3>
+                <img id="rfCalculatedImage" src="" alt="Rf Calculated Image">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const formData = new FormData();
+        const imageFile = document.getElementById('image').files[0];
+        formData.append('image', imageFile);
+
+        fetch('/process_image', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.stacked_image_url && data.rf_calculated_image_url) {
+                // Create a timestamp to bypass the browser cache
+                const timestamp = new Date().getTime();
+
+                // Update the image sources with the timestamp
+                document.getElementById('stackedImage').src = data.stacked_image_url + "?t=" + timestamp;
+                document.getElementById('stackedImage').style.display = 'block';
+
+                document.getElementById('rfCalculatedImage').src = data.rf_calculated_image_url + "?t=" + timestamp;
+                document.getElementById('rfCalculatedImage').style.display = 'block';
+            } else {
+                alert('Error processing the image. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while processing the image.');
+        });
+    });
+    </script>
+</body>
+</html>

@@ -2,8 +2,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-def load_and_preprocess_image(image_path):
-    img = cv2.imread(image_path)
+def load_and_preprocess_image(img):
     cropped_img = crop_image(img, 0.10, 0.10, 0.05, 0.05)
     resized_img = cv2.resize(cropped_img, (256, 500))
     gray_image = cv2.cvtColor(resized_img, cv2.COLOR_BGR2GRAY)
@@ -93,8 +92,8 @@ def draw_text(image, x, y, x2, y2, y_normalized):
     draw.text((text_x, text_y), text, font=font, fill=(255, 0, 0))
     image[:] = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
 
-def main(image_path):
-    resized_img, blurred_image = load_and_preprocess_image(image_path)
+def RFValueCalc(img):
+    resized_img, blurred_image = load_and_preprocess_image(img)
     gradient_magnitude = compute_gradients(blurred_image)
     initial_threshold = 50
     initial_min_area_threshold = 200
@@ -110,8 +109,5 @@ def main(image_path):
         num_rectangles = len(rectangles)
         initial_min_area_threshold -= 100
 
-    cv2.imwrite('Output.jpg', resized_img)
-
-if __name__ == "__main__":
-    main('121.jpeg')
+    return resized_img
 
